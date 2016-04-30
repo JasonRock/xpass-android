@@ -10,4 +10,5 @@
     <string name="button_send">SEND</string>
 
     <string name="title_activity_display_message">MY MESSAGE</string>
+    <string name="info_list">Info List</string>
 </resources>
