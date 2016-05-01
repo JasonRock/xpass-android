@@ -14,21 +14,22 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <EditText android:id="@+id/edit_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="@string/edit_message" />
+    <!--<EditText android:id="@+id/edit_message"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="@string/edit_message" />-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_send"
-        android:onClick="sendMessage"/>
-    <ListView android:id="@+id/info_list"
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/button_send"-->
+        <!--android:onClick="sendMessage"/>-->
+
+    <TextView android:id="@+id/info_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <TextView android:id="@+id/info_test"
+    <ListView android:id="@+id/info_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
