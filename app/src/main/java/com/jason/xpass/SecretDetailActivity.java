@@ -6,16 +6,26 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.jason.xpass.http.HttpUtils;
 import com.jason.xpass.http.XCallBack;
+import com.jason.xpass.model.ItemInfo;
 import com.jason.xpass.model.SecretDetail;
+import com.jason.xpass.model.SecretInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +69,36 @@ public class SecretDetailActivity extends AppCompatActivity {
                 if (listView != null) {
                     listView.setAdapter(simpleAdapter);
                 }
+            } else if (msg.what == 2) {
+
+                List<ItemInfo> itemInfos = (List<ItemInfo>) msg.obj;
+                LayoutInflater inflater = getLayoutInflater();
+
+                View layout = inflater.inflate(R.layout.dialog, null);
+                new AlertDialog.Builder(SecretDetailActivity.this).setTitle("自定义布局").setView(layout)
+                        .setPositiveButton("确定", null).setNegativeButton("取消", null).show();
+
+                final String[] m = {"A型", "B型", "O型", "AB型", "其他"};
+                // Select menu
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(SecretDetailActivity.this,
+                        android.R.layout.simple_spinner_item, m);
+                Spinner spinner = (Spinner) findViewById(R.id.Spinner01);
+                assert spinner != null;
+                final EditText editText = (EditText) findViewById(R.id.etname);
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        editText.setText("你的血型是：" + m[position]);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+
+                //设置默认值
+                spinner.setVisibility(View.VISIBLE);
             }
         }
     };
@@ -91,11 +131,25 @@ public class SecretDetailActivity extends AppCompatActivity {
 
         // Load floating button: append item
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_item_add);
+        assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
+                TextView detailView = ((TextView) findViewById(R.id.detail_item_id));
+                assert detailView != null;
+                int secretId = detailView.getId();
+                // Get items that could be appended
+                HttpUtils.get("/remainItems/" + secretId, new XCallBack() {
+                    @Override
+                    public void onResponse(String json) {
+                        List<ItemInfo> itemInfos = JSONArray.parseArray(json, ItemInfo.class);
+
+                        Message msg = Message.obtain(itemDetailHandler);
+                        msg.obj = itemInfos;
+                        msg.what = 2;
+                        msg.sendToTarget();
+                    }
+                });
             }
         });
     }
