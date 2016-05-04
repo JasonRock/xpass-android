@@ -80,7 +80,8 @@ public class SecretDetailActivity extends AppCompatActivity {
                         .setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // TODO
+                                // Request api
+
                             }
                         }).setNegativeButton("CANCEL", null).show();
 
