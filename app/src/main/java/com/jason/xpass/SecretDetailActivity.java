@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -25,15 +26,20 @@ import com.jason.xpass.adapter.ItemInfoAdapter;
 import com.jason.xpass.http.HttpUtils;
 import com.jason.xpass.http.XCallBack;
 import com.jason.xpass.model.ItemInfo;
+import com.jason.xpass.model.RelationSecretItem;
 import com.jason.xpass.model.SecretDetail;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Response;
 
 public class SecretDetailActivity extends AppCompatActivity {
 
@@ -74,23 +80,54 @@ public class SecretDetailActivity extends AppCompatActivity {
                 }
             } else if (msg.what == 2) {
 
+                List<ItemInfo> itemInfos = (List<ItemInfo>) msg.obj;
+                if(itemInfos.size() == 0) {
+                    Toast.makeText(SecretDetailActivity.this, "Are you kidding me?",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 LayoutInflater inflater = getLayoutInflater();
                 final View layout = inflater.inflate(R.layout.dialog, null);
+
+                final Spinner spinner = (Spinner) layout.findViewById(R.id.planets_spinner);
+                assert spinner != null;
+
                 new AlertDialog.Builder(SecretDetailActivity.this).setTitle("SELECT ITEM").setView(layout)
                         .setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // Request api
+                                ItemInfo selectedItem = (ItemInfo) spinner.getSelectedItem();
+                                EditText itemContent = (EditText) layout.findViewById(R.id.append_item_content);
+                                String content = itemContent.getText().toString();
+                                TextView detailView = ((TextView) findViewById(R.id.detail_item_id));
+                                assert detailView != null;
+                                int secretId = Integer.valueOf(detailView.getText().toString());
 
+                                // Append item to selected secret
+                                RelationSecretItem relationSecretItem = new RelationSecretItem();
+                                relationSecretItem.setItemId(selectedItem.getId());
+                                relationSecretItem.setItemContent(content);
+                                relationSecretItem.setSecretId(secretId);
+
+                                HttpUtils.post("/appendItem", relationSecretItem, new okhttp3.Callback() {
+                                    @Override
+                                    public void onFailure(Call call, IOException e) {
+                                        System.out.println("FUCK");
+                                    }
+
+                                    @Override
+                                    public void onResponse(Call call, Response response) throws IOException {
+                                        System.out.println("Wow, refresh the page.");
+                                    }
+                                });
                             }
                         }).setNegativeButton("CANCEL", null).show();
 
-                List<ItemInfo> itemInfos = (List<ItemInfo>) msg.obj;
                 final ArrayAdapter<ItemInfo> adapter = new ItemInfoAdapter(SecretDetailActivity.this,
                         R.layout.detail_item, itemInfos);
 
-                Spinner spinner = (Spinner) layout.findViewById(R.id.planets_spinner);
-                assert spinner != null;
+
                 spinner.setAdapter(adapter);
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -149,7 +186,7 @@ public class SecretDetailActivity extends AppCompatActivity {
 
                 TextView detailView = ((TextView) findViewById(R.id.detail_item_id));
                 assert detailView != null;
-                int secretId = detailView.getId();
+                int secretId = Integer.valueOf(detailView.getText().toString());
                 // Get items that could be appended
                 HttpUtils.get("/remainItems/" + secretId, new XCallBack() {
                     @Override

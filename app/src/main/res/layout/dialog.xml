@@ -14,6 +14,7 @@
         android:paddingEnd="5sp" />
 
     <EditText
+        android:id="@+id/append_item_content"
         android:layout_width="0sp"
         android:layout_height="wrap_content"
         android:layout_weight=".60"

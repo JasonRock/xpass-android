@@ -46,4 +46,9 @@ public class ItemInfo {
     public void setSecurityLevel(int securityLevel) {
         this.securityLevel = securityLevel;
     }
+
+    @Override
+    public String toString() {
+        return this.getItemDesc() == null ? "EMPTY" : this.getItemDesc();
+    }
 }
