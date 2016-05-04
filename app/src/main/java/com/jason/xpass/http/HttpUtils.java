@@ -13,7 +13,7 @@ import okhttp3.Request;
  */
 public class HttpUtils {
 
-    private static final String HOST = "http://192.168.0.101:9000";
+    private static final String HOST = "http://108.61.126.193:9000";
 
     public static void get(String url, Callback callback) {
         try {

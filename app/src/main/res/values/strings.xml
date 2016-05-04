@@ -12,4 +12,15 @@
     <string name="title_activity_display_message">MY MESSAGE</string>
     <string name="info_list">Info List</string>
     <string name="title_secret_detail">SECRET DETAIL</string>
+
+    <string-array name="planets_array">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
 </resources>
