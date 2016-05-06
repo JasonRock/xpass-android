@@ -21,6 +21,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
+import com.jason.xpass.activity.AddSecretInfoActivity;
 import com.jason.xpass.http.HttpUtils;
 import com.jason.xpass.http.XCallBack;
 import com.jason.xpass.model.SecretInfo;
@@ -73,12 +74,14 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Add secret info button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(MainActivity.this, AddSecretInfoActivity.class);
+                startActivity(intent);
             }
         });
 
