@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Load homepage's data: secret info list
-        HttpUtils.get("/infos", new XCallBack() {
+        HttpUtils.post("/infos", "abcasodijfasldkfa;lskdf", new XCallBack() {
 
             @Override
             public void onResponse(String json) {
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
 
     private List<Map<String, Object>> getInfos(List<SecretInfo> secretInfos) {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for(SecretInfo secretInfo : secretInfos) {
+        for (SecretInfo secretInfo : secretInfos) {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("id", secretInfo.getId());
             map.put("title", secretInfo.getTitle());

@@ -1,6 +1,11 @@
 package com.jason.xpass;
 
+import com.jason.xpass.http.HttpUtils;
+import com.jason.xpass.util.RSA;
+
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -17,6 +22,9 @@ public class ExampleUnitTest {
     @Test
     public void http_test() throws Exception {
 
+        Map<String, Object> pair = RSA.genKeyPair();
+        System.out.println(RSA.getPrivateKey(pair));
+        System.out.println(RSA.getPublicKey(pair));
         assertTrue(true);
     }
 

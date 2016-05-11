@@ -39,6 +39,7 @@ public abstract class XCallBack implements Callback {
         String info = transportResponse.getInfo();
         // Decrypt the info
         String src = AES.decrypt(info);
+
         onResponse(src);
 
     }

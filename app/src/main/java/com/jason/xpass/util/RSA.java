@@ -5,11 +5,17 @@ import android.util.Base64;
 import java.io.ByteArrayOutputStream;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 
@@ -39,6 +45,39 @@ public class RSA {
      * Max decrypt block
      */
     private static final int MAX_DECRYPT_BLOCK = 128;
+
+    /** */
+    /**
+     * 获取公钥的key
+     */
+    private static final String PUBLIC_KEY = "RSAPublicKey";
+
+    /** */
+    /**
+     * 获取私钥的key
+     */
+    private static final String PRIVATE_KEY = "RSAPrivateKey";
+
+    /** */
+    /**
+     * <p>
+     * 生成密钥对(公钥和私钥)
+     * </p>
+     *
+     * @return
+     * @throws Exception
+     */
+    public static Map<String, Object> genKeyPair() throws Exception {
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
+        keyPairGen.initialize(1024);
+        KeyPair keyPair = keyPairGen.generateKeyPair();
+        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        Map<String, Object> keyMap = new HashMap<String, Object>(2);
+        keyMap.put(PUBLIC_KEY, publicKey);
+        keyMap.put(PRIVATE_KEY, privateKey);
+        return keyMap;
+    }
 
     /**
      * Sign data by private key
@@ -106,7 +145,7 @@ public class RSA {
      * @return
      */
     public static byte[] encryptByPublicKey(byte[] data, String publicKey) throws Exception {
-        return encrypt(data, publicKey, 2);
+        return encrypt(data, publicKey, 1);
     }
 
     /**
@@ -117,7 +156,7 @@ public class RSA {
      * @return
      */
     public static byte[] encryptByPrivateKey(byte[] data, String privateKey) throws Exception {
-        return encrypt(data, privateKey, 1);
+        return encrypt(data, privateKey, 2);
     }
 
     private static byte[] decrypt(byte[] encryptedData, String keyStr, int keyFlag) throws Exception {
@@ -126,8 +165,8 @@ public class RSA {
         Key key = null;
         Cipher cipher = null;
         if (keyFlag == 1) {
-            X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
-            key = keyFactory.generatePublic(x509KeySpec);
+            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
+            key = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
             cipher = Cipher.getInstance(keyFactory.getAlgorithm());
 
         } else if (keyFlag == 2) {
@@ -159,7 +198,7 @@ public class RSA {
 
     public static byte[] encrypt(byte[] data, String keyStr, int keyFlag) throws Exception {
         byte[] keyBytes = Base64.decode(keyStr, Base64.DEFAULT);
-        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
+
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         Key key = null;
         Cipher cipher = null;
@@ -168,8 +207,8 @@ public class RSA {
             key = keyFactory.generatePublic(x509KeySpec);
             cipher = Cipher.getInstance(keyFactory.getAlgorithm());
         } else if (keyFlag == 2) {
-            X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
-            key = keyFactory.generatePublic(x509KeySpec);
+            PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
+            key = keyFactory.generatePrivate(pkcs8KeySpec);
             cipher = Cipher.getInstance(keyFactory.getAlgorithm());
         }
 
@@ -194,4 +233,35 @@ public class RSA {
         out.close();
         return encryptedData;
     }
+
+    /**
+     * <p>
+     * 获取私钥
+     * </p>
+     *
+     * @param keyMap 密钥对
+     * @return
+     * @throws Exception
+     */
+    public static String getPrivateKey(Map<String, Object> keyMap)
+            throws Exception {
+        Key key = (Key) keyMap.get(PRIVATE_KEY);
+        return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+    }
+
+    /**
+     * <p>
+     * 获取公钥
+     * </p>
+     *
+     * @param keyMap 密钥对
+     * @return
+     * @throws Exception
+     */
+    public static String getPublicKey(Map<String, Object> keyMap)
+            throws Exception {
+        Key key = (Key) keyMap.get(PUBLIC_KEY);
+        return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+    }
+
 }
