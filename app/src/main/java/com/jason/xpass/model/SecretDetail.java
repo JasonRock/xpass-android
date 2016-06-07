@@ -9,6 +9,7 @@ public class SecretDetail {
 
     private int id;
     private String title;
+    private int itemId;
     private String itemName;
     private String itemDesc;
     private int securityLevel;
@@ -28,6 +29,14 @@ public class SecretDetail {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public int getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
     }
 
     public String getItemName() {

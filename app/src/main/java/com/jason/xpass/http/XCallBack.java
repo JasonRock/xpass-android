@@ -1,17 +1,14 @@
 package com.jason.xpass.http;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.jason.xpass.util.AES;
+import com.jason.xpass.util.RSA;
+import com.jason.xpass.util.codec.Base64;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
-import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Headers;
 import okhttp3.Response;
 
 /**
@@ -20,6 +17,8 @@ import okhttp3.Response;
  * Created by js.lee on 4/30/16.
  */
 public abstract class XCallBack implements Callback {
+
+    protected ThreadLocal<Map<String, Object>> keyPair;
 
     @Override
     public void onFailure(Call call, IOException e) {
@@ -30,18 +29,21 @@ public abstract class XCallBack implements Callback {
     public void onResponse(Call call, Response response) throws IOException {
         if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
-//        Headers responseHeaders = response.headers();
-//        for (int i = 0, size = responseHeaders.size(); i < size; i++) {
-//            System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-//        }
-
         TransportResponse transportResponse = JSON.parseObject(response.body().string(), TransportResponse.class);
         String info = transportResponse.getInfo();
-        // Decrypt the info
-        String src = AES.decrypt(info);
 
-        onResponse(src);
+        try {
+            String src = new String(RSA.decryptByPrivateKey(Base64.decodeBase64(info), RSA.getPrivateKey(keyPair.get())));
+            onResponse(src);
+        } catch (Exception e) {
+            e.printStackTrace();
+            onResponse(null);
+        }
+    }
 
+    public void setKeyPair(Map<String, Object> keyPair) {
+        this.keyPair = new ThreadLocal<Map<String, Object>>();
+        this.keyPair.set(keyPair);
     }
 
     public abstract void onResponse(String json);

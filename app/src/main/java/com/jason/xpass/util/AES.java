@@ -1,6 +1,6 @@
 package com.jason.xpass.util;
 
-import android.util.Base64;
+import com.jason.xpass.util.codec.Base64;
 
 /**
  * Description:
@@ -13,11 +13,11 @@ public class AES {
 
     public static String encrypt(String src) {
         byte[] b = CryptoEncryption.encrypt(src.getBytes(), AES_KEY, "AES");
-        return Base64.encodeToString(b, Base64.DEFAULT);
+        return Base64.encodeBase64String(b);
     }
 
     public static String decrypt(String src) {
-        byte[] b = CryptoEncryption.decrypt(Base64.decode(src, Base64.DEFAULT), AES_KEY, "AES");
+        byte[] b = CryptoEncryption.decrypt(Base64.decodeBase64(src), AES_KEY, "AES");
         if (b == null) {
             return null;
         }

@@ -10,10 +10,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -28,18 +29,12 @@ import com.jason.xpass.http.XCallBack;
 import com.jason.xpass.model.ItemInfo;
 import com.jason.xpass.model.RelationSecretItem;
 import com.jason.xpass.model.SecretDetail;
+import com.jason.xpass.util.RequestDataUtil;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.Response;
 
 public class SecretDetailActivity extends AppCompatActivity {
 
@@ -71,8 +66,8 @@ public class SecretDetailActivity extends AppCompatActivity {
                 SimpleAdapter simpleAdapter = new SimpleAdapter(SecretDetailActivity.this,
                         getDetails(list),
                         R.layout.item_detail,
-                        new String[]{"itemDesc", "itemContent"},
-                        new int[]{R.id.detail_item_desc, R.id.detail_item_content});
+                        new String[]{"itemId", "itemDesc", "itemContent"},
+                        new int[]{R.id.detail_item_id, R.id.detail_item_desc, R.id.detail_item_content});
 
                 ListView listView = (ListView) findViewById(R.id.detail_items);
                 if (listView != null) {
@@ -81,7 +76,7 @@ public class SecretDetailActivity extends AppCompatActivity {
             } else if (msg.what == 2) {
 
                 List<ItemInfo> itemInfos = (List<ItemInfo>) msg.obj;
-                if(itemInfos.size() == 0) {
+                if (itemInfos.size() == 0) {
                     Toast.makeText(SecretDetailActivity.this, "Are you kidding me?",
                             Toast.LENGTH_SHORT).show();
                     return;
@@ -110,15 +105,10 @@ public class SecretDetailActivity extends AppCompatActivity {
                                 relationSecretItem.setItemContent(content);
                                 relationSecretItem.setSecretId(secretId);
 
-                                HttpUtils.post("/appendItem", relationSecretItem, new okhttp3.Callback() {
+                                HttpUtils.post("/appendItem", relationSecretItem, new XCallBack() {
                                     @Override
-                                    public void onFailure(Call call, IOException e) {
-                                        System.out.println("FUCK");
-                                    }
-
-                                    @Override
-                                    public void onResponse(Call call, Response response) throws IOException {
-                                        System.out.println("Wow, refresh the page.");
+                                    public void onResponse(String json) {
+                                        System.out.println("ok");
                                     }
                                 });
                             }
@@ -160,7 +150,7 @@ public class SecretDetailActivity extends AppCompatActivity {
         final int secretId = intent.getIntExtra("secretId", 0);
         final String title = intent.getStringExtra("title");
 
-        HttpUtils.get("/detail/" + secretId, new XCallBack() {
+        HttpUtils.post("/detail", RequestDataUtil.instance().append("id", secretId), new XCallBack() {
 
             @Override
             public void onResponse(String json) {
@@ -188,7 +178,7 @@ public class SecretDetailActivity extends AppCompatActivity {
                 assert detailView != null;
                 int secretId = Integer.valueOf(detailView.getText().toString());
                 // Get items that could be appended
-                HttpUtils.get("/remainItems/" + secretId, new XCallBack() {
+                HttpUtils.post("/remainItems", RequestDataUtil.instance().append("id", secretId), new XCallBack() {
                     @Override
                     public void onResponse(String json) {
                         List<ItemInfo> itemInfos = JSONArray.parseArray(json, ItemInfo.class);
@@ -201,6 +191,37 @@ public class SecretDetailActivity extends AppCompatActivity {
                 });
             }
         });
+
+        Button updateButton = (Button) findViewById(R.id.button_detail_update);
+        assert updateButton != null;
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ListView detailListView = ((ListView) findViewById(R.id.detail_items));
+                if (detailListView == null) {
+                    return;
+                }
+                ListAdapter adapter = detailListView.getAdapter();
+                int count = adapter.getCount();
+                for (int i = 0; i < count; i++) {
+                    Map<String, String> item = (HashMap<String, String>) adapter.getItem(i);
+                    String secretId = item.get("secretId");
+                    String itemId = item.get("itemId");
+                    String itemName = item.get("itemName");
+                    String itemContent = item.get("itemContent");
+
+
+                    HttpUtils.post("/appendItem", RequestDataUtil.instance().append("secretId", secretId).append("itemId", itemId)
+                            .append("itemContent", itemContent), new XCallBack() {
+                        @Override
+                        public void onResponse(String json) {
+                            System.out.println("update");
+                        }
+                    });
+                }
+                System.out.println("update");
+            }
+        });
     }
 
     private List<Map<String, Object>> getDetails(List<SecretDetail> secretDetails) {
@@ -209,6 +230,7 @@ public class SecretDetailActivity extends AppCompatActivity {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("id", secretDetail.getId());
             map.put("title", secretDetail.getTitle());
+            map.put("itemId", secretDetail.getItemId());
             map.put("itemName", secretDetail.getItemName());
             map.put("itemDesc", secretDetail.getItemDesc());
             map.put("securityLevel", secretDetail.getSecurityLevel());
@@ -230,4 +252,5 @@ public class SecretDetailActivity extends AppCompatActivity {
         }
         return list;
     }
+
 }

@@ -95,10 +95,13 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Load homepage's data: secret info list
-        HttpUtils.post("/infos", "abcasodijfasldkfa;lskdf", new XCallBack() {
+        HttpUtils.post("/infos", 1, new XCallBack() {
 
             @Override
             public void onResponse(String json) {
+                if (json == null) {
+                    return;
+                }
                 Message msg = Message.obtain(infoListHandler);
                 msg.obj = JSON.parseArray(json, SecretInfo.class);
                 msg.what = 1;
@@ -148,10 +151,15 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_camera) {
 
             TextView textView = new TextView(this);
-            HttpUtils.get("/infos", new XCallBack() {
+            HttpUtils.post("/infos", null, new XCallBack() {
 
                 @Override
                 public void onResponse(String json) {
+
+                    if (json == null) {
+                        return;
+                    }
+
                     Message msg = Message.obtain(infoListHandler);
                     msg.obj = JSON.parseArray(json, SecretInfo.class);
                     msg.what = 1;

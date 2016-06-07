@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -28,4 +31,5 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.alibaba:fastjson:1.2.10'
     compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'commons-codec:commons-codec:1.10'
 }
